@@ -2,13 +2,13 @@ layer {
   name: "data"
   type: "Data"
   top: "data"
-  top: "Data1"
+ # top: "Data1"
   transform_param {
     scale: 0.00392156862745
   }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data"
-    batch_size: 64
+    batch_size: 2
     backend: LMDB
   }
 }
@@ -16,13 +16,13 @@ layer {
   name: "geo"
   type: "Data"
   top: "geo"
-  top: "Data2"
-  transform_param {
-    scale: 0.00392156862745
-  }
+ # top: "Data2"
+ # transform_param {
+ #   scale: 0.00392156862745
+ # }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask"
-    batch_size: 64
+    batch_size: 2
     backend: LMDB
   }
 }
@@ -503,7 +503,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 3
+    num_output: 2
     pad: 0
     kernel_size: 1
   }
@@ -517,7 +517,7 @@ layer {
     lr_mult: 0
   }
   convolution_param {
-    num_output: 3
+    num_output: 2
     bias_term: false
     kernel_size: 4
     stride: 2
@@ -537,7 +537,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 3
+    num_output: 2
     pad: 0
     kernel_size: 1
   }
@@ -572,7 +572,7 @@ layer {
     lr_mult: 0
   }
   convolution_param {
-    num_output: 3
+    num_output: 2
     bias_term: false
     kernel_size: 4
     stride: 2
@@ -592,7 +592,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 3
+    num_output: 2
     pad: 0
     kernel_size: 1
   }

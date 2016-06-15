@@ -22,7 +22,7 @@ def fcn(train,mask):
                   )
 
     n.geo, _ = L.Data(backend=P.Data.LMDB, batch_size=64, source=mask,
-                           transform_param=dict(scale=1. / 255), ntop=2
+                           '''transform_param=dict(scale=1. / 255)''', ntop=2
                    )
     # the base net
     n.conv1_1, n.relu1_1 = conv_relu(n.data, 64, pad=100)
@@ -54,58 +54,26 @@ def fcn(train,mask):
     n.fc7, n.relu7 = conv_relu(n.drop6, 4096, ks=1, pad=0)
     n.drop7 = L.Dropout(n.relu7, dropout_ratio=0.5, in_place=True)
 
-    # n.score_fr_sem = L.Convolution(n.drop7, num_output=33, kernel_size=1, pad=0,
-    #     param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
-    # n.upscore2_sem = L.Deconvolution(n.score_fr_sem,
-    #     convolution_param=dict(num_output=33, kernel_size=4, stride=2,
-    #         bias_term=False),
-    #     param=[dict(lr_mult=0)])
-    #
-    # n.score_pool4_sem = L.Convolution(n.pool4, num_output=33, kernel_size=1, pad=0,
-    #     param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
-    # n.score_pool4_semc = crop(n.score_pool4_sem, n.upscore2_sem)
-    # n.fuse_pool4_sem = L.Eltwise(n.upscore2_sem, n.score_pool4_semc,
-    #         operation=P.Eltwise.SUM)
-    # n.upscore_pool4_sem  = L.Deconvolution(n.fuse_pool4_sem,
-    #     convolution_param=dict(num_output=33, kernel_size=4, stride=2,
-    #         bias_term=False),
-    #     param=[dict(lr_mult=0)])
-    #
-    # n.score_pool3_sem = L.Convolution(n.pool3, num_output=33, kernel_size=1,
-    #         pad=0, param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2,
-    #             decay_mult=0)])
-    # n.score_pool3_semc = crop(n.score_pool3_sem, n.upscore_pool4_sem)
-    # n.fuse_pool3_sem = L.Eltwise(n.upscore_pool4_sem, n.score_pool3_semc,
-    #         operation=P.Eltwise.SUM)
-    # n.upscore8_sem = L.Deconvolution(n.fuse_pool3_sem,
-    #     convolution_param=dict(num_output=33, kernel_size=16, stride=8,
-    #         bias_term=False),
-    #     param=[dict(lr_mult=0)])
-    #
-    # n.score_sem = crop(n.upscore8_sem, n.data)
-    # # loss to make score happy (o.w. loss_sem)
-    # n.loss = L.SoftmaxWithLoss(n.score_sem, n.sem,
-    #         loss_param=dict(normalize=False, ignore_label=255))
-
-    n.score_fr_geo = L.Convolution(n.drop7, num_output=3, kernel_size=1, pad=0,
+    # upsampling
+    n.score_fr_geo = L.Convolution(n.drop7, num_output=2, kernel_size=1, pad=0,
         param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
 
     n.upscore2_geo = L.Deconvolution(n.score_fr_geo,
-        convolution_param=dict(num_output=3, kernel_size=4, stride=2,
+        convolution_param=dict(num_output=2, kernel_size=4, stride=2,
             bias_term=False),
         param=[dict(lr_mult=0)])
 
-    n.score_pool4_geo = L.Convolution(n.pool4, num_output=3, kernel_size=1, pad=0,
+    n.score_pool4_geo = L.Convolution(n.pool4, num_output=2, kernel_size=1, pad=0,
         param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
     n.score_pool4_geoc = crop(n.score_pool4_geo, n.upscore2_geo)
     n.fuse_pool4_geo = L.Eltwise(n.upscore2_geo, n.score_pool4_geoc,
             operation=P.Eltwise.SUM)
     n.upscore_pool4_geo  = L.Deconvolution(n.fuse_pool4_geo,
-        convolution_param=dict(num_output=3, kernel_size=4, stride=2,
+        convolution_param=dict(num_output=2, kernel_size=4, stride=2,
             bias_term=False),
         param=[dict(lr_mult=0)])
 
-    n.score_pool3_geo = L.Convolution(n.pool3, num_output=3, kernel_size=1,
+    n.score_pool3_geo = L.Convolution(n.pool3, num_output=2, kernel_size=1,
             pad=0, param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2,
                 decay_mult=0)])
     n.score_pool3_geoc = crop(n.score_pool3_geo, n.upscore_pool4_geo)
