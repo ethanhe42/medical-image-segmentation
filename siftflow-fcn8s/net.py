@@ -17,15 +17,14 @@ def fcn(train,mask):
     #         layer='SIFTFlowSegDataLayer', ntop=3,
     #         param_str=str(dict(siftflow_dir='../data/sift-flow',
     #             split=split, seed=1337)))
-    n.data, _ =L.Data(backend=P.Data.LMDB,batch_size=64, source=train,
-                             transform_param=dict(scale=1./255),ntop=2
+    n.data =L.Data(backend=P.Data.LMDB,batch_size=64, source=train,
+                             transform_param=dict(scale=1./255),ntop=1
                   )
 
-    n.geo, _ = L.Data(backend=P.Data.LMDB, batch_size=64, source=mask,
-                           '''transform_param=dict(scale=1. / 255)''', ntop=2
-                   )
+    n.geo = L.Data(backend=P.Data.LMDB, batch_size=64, source=mask,
+                         ntop=1)
     # the base net
-    n.conv1_1, n.relu1_1 = conv_relu(n.data, 64, pad=100)
+    n.conv1_1, n.relu1_1 = conv_relu(n.data, 64)#,pad=100)
     n.conv1_2, n.relu1_2 = conv_relu(n.relu1_1, 64)
     n.pool1 = max_pool(n.relu1_2)
 
@@ -80,11 +79,12 @@ def fcn(train,mask):
     n.fuse_pool3_geo = L.Eltwise(n.upscore_pool4_geo, n.score_pool3_geoc,
             operation=P.Eltwise.SUM)
     n.upscore8_geo = L.Deconvolution(n.fuse_pool3_geo,
-        convolution_param=dict(num_output=2, kernel_size=16, stride=8,
+        convolution_param=dict(num_output=2, kernel_size=24, stride=8,#ks 16
             bias_term=False),
         param=[dict(lr_mult=0)])
 
-    n.score_geo = max_pool(crop(n.upscore8_geo, n.data))
+    #n.score_geo = max_pool(crop(n.upscore8_geo, n.data))
+    n.score_geo = n.upscore8_geo
     n.loss_geo = L.SoftmaxWithLoss(n.score_geo, n.geo,
             loss_param=dict(normalize=False, ignore_label=255))
 

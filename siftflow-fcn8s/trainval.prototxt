@@ -2,13 +2,12 @@ layer {
   name: "data"
   type: "Data"
   top: "data"
- # top: "Data1"
   transform_param {
     scale: 0.00392156862745
   }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data"
-    batch_size: 2
+    batch_size: 64
     backend: LMDB
   }
 }
@@ -16,13 +15,9 @@ layer {
   name: "geo"
   type: "Data"
   top: "geo"
- # top: "Data2"
- # transform_param {
- #   scale: 0.00392156862745
- # }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask"
-    batch_size: 2
+    batch_size: 64
     backend: LMDB
   }
 }
@@ -41,7 +36,7 @@ layer {
   }
   convolution_param {
     num_output: 64
-    pad: 100
+    pad: 1
     kernel_size: 3
     stride: 1
   }
@@ -619,40 +614,18 @@ layer {
   }
 }
 layer {
-  name: "upscore8_geo"
+  name: "score_geo"
   type: "Deconvolution"
   bottom: "fuse_pool3_geo"
-  top: "upscore8_geo"
+  top: "score_geo"
   param {
     lr_mult: 0
   }
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 16
+    kernel_size: 24
     stride: 8
-  }
-}
-layer {
-  name: "Crop1"
-  type: "Crop"
-  bottom: "upscore8_geo"
-  bottom: "data"
-  top: "Crop1"
-  crop_param {
-    axis: 2
-    offset: 31
-  }
-}
-layer {
-  name: "score_geo"
-  type: "Pooling"
-  bottom: "Crop1"
-  top: "score_geo"
-  pooling_param {
-    pool: MAX
-    kernel_size: 2
-    stride: 2
   }
 }
 layer {
