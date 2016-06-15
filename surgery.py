@@ -38,9 +38,9 @@ def interp(net, layers):
         m, k, h, w = net.params[l][0].data.shape
         if m != k and k != 1:
             print 'input + output channels need to be the same or |output| == 1'
-            raise
+            exit()
         if h != w:
             print 'filters need to be square'
-            raise
+            exit()
         filt = upsample_filt(h)
         net.params[l][0].data[range(m), range(k), :, :] = filt

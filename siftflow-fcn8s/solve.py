@@ -1,3 +1,5 @@
+import sys
+sys.path.append("/home/yihuihe/medical-image-segmentation")
 import caffe
 import numpy as np
 

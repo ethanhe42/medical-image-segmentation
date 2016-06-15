@@ -11,17 +11,17 @@ def conv_relu(bottom, nout, ks=3, stride=1, pad=1):
 def max_pool(bottom, ks=2, stride=2):
     return L.Pooling(bottom, pool=P.Pooling.MAX, kernel_size=ks, stride=stride)
 
-def fcn(split):
+def fcn(train,mask):
     n = caffe.NetSpec()
     # n.data, n.sem, n.geo = L.Python(module='siftflow_layers',
     #         layer='SIFTFlowSegDataLayer', ntop=3,
     #         param_str=str(dict(siftflow_dir='../data/sift-flow',
     #             split=split, seed=1337)))
-    n.data, _ =L.Data(backend=P.Data.LMDB,batch_size=64, source="train",
+    n.data, _ =L.Data(backend=P.Data.LMDB,batch_size=64, source=train,
                              transform_param=dict(scale=1./255),ntop=2
                   )
 
-    _, n.geo = L.Label(backend=P.Data.LMDB, batch_size=64, source="mask",
+    n.geo, _ = L.Data(backend=P.Data.LMDB, batch_size=64, source=mask,
                            transform_param=dict(scale=1. / 255), ntop=2
                    )
     # the base net
@@ -112,11 +112,11 @@ def fcn(split):
     n.fuse_pool3_geo = L.Eltwise(n.upscore_pool4_geo, n.score_pool3_geoc,
             operation=P.Eltwise.SUM)
     n.upscore8_geo = L.Deconvolution(n.fuse_pool3_geo,
-        convolution_param=dict(num_output=2, kernel_size=16, stride=8, # TODO: change num_output?
+        convolution_param=dict(num_output=2, kernel_size=16, stride=8,
             bias_term=False),
         param=[dict(lr_mult=0)])
 
-    n.score_geo = crop(n.upscore8_geo, n.data)
+    n.score_geo = max_pool(crop(n.upscore8_geo, n.data))
     n.loss_geo = L.SoftmaxWithLoss(n.score_geo, n.geo,
             loss_param=dict(normalize=False, ignore_label=255))
 
@@ -124,10 +124,10 @@ def fcn(split):
 
 def make_net():
     with open('trainval.prototxt', 'w') as f:
-        f.write(str(fcn('trainval')))
+        f.write(str(fcn('/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data','/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask')))
 
     with open('test.prototxt', 'w') as f:
-        f.write(str(fcn('test')))
+        f.write(str(fcn('/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data','/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask')))
 
 if __name__ == '__main__':
     make_net()

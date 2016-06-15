@@ -7,21 +7,21 @@ layer {
     scale: 0.00392156862745
   }
   data_param {
-    source: "train"
+    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data"
     batch_size: 64
     backend: LMDB
   }
 }
 layer {
-  name: "Data2"
+  name: "geo"
   type: "Data"
-  top: "Data2"
   top: "geo"
+  top: "Data2"
   transform_param {
     scale: 0.00392156862745
   }
   data_param {
-    source: "mask"
+    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask"
     batch_size: 64
     backend: LMDB
   }
@@ -634,14 +634,25 @@ layer {
   }
 }
 layer {
-  name: "score_geo"
+  name: "Crop1"
   type: "Crop"
   bottom: "upscore8_geo"
   bottom: "data"
-  top: "score_geo"
+  top: "Crop1"
   crop_param {
     axis: 2
     offset: 31
+  }
+}
+layer {
+  name: "score_geo"
+  type: "Pooling"
+  bottom: "Crop1"
+  top: "score_geo"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
   }
 }
 layer {
