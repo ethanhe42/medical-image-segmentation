@@ -1,13 +1,29 @@
 layer {
   name: "data"
-  type: "Python"
+  type: "Data"
   top: "data"
-  top: "sem"
+  top: "Data1"
+  transform_param {
+    scale: 0.00392156862745
+  }
+  data_param {
+    source: "train"
+    batch_size: 64
+    backend: LMDB
+  }
+}
+layer {
+  name: "Data2"
+  type: "Data"
+  top: "Data2"
   top: "geo"
-  python_param {
-    module: "siftflow_layers"
-    layer: "SIFTFlowSegDataLayer"
-    param_str: "{\'siftflow_dir\': \'../data/sift-flow\', \'seed\': 1337, \'split\': \'trainval\'}"
+  transform_param {
+    scale: 0.00392156862745
+  }
+  data_param {
+    source: "mask"
+    batch_size: 64
+    backend: LMDB
   }
 }
 layer {
@@ -474,172 +490,6 @@ layer {
   }
 }
 layer {
-  name: "score_fr_sem"
-  type: "Convolution"
-  bottom: "fc7"
-  top: "score_fr_sem"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 33
-    pad: 0
-    kernel_size: 1
-  }
-}
-layer {
-  name: "upscore2_sem"
-  type: "Deconvolution"
-  bottom: "score_fr_sem"
-  top: "upscore2_sem"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 33
-    bias_term: false
-    kernel_size: 4
-    stride: 2
-  }
-}
-layer {
-  name: "score_pool4_sem"
-  type: "Convolution"
-  bottom: "pool4"
-  top: "score_pool4_sem"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 33
-    pad: 0
-    kernel_size: 1
-  }
-}
-layer {
-  name: "score_pool4_semc"
-  type: "Crop"
-  bottom: "score_pool4_sem"
-  bottom: "upscore2_sem"
-  top: "score_pool4_semc"
-  crop_param {
-    axis: 2
-    offset: 5
-  }
-}
-layer {
-  name: "fuse_pool4_sem"
-  type: "Eltwise"
-  bottom: "upscore2_sem"
-  bottom: "score_pool4_semc"
-  top: "fuse_pool4_sem"
-  eltwise_param {
-    operation: SUM
-  }
-}
-layer {
-  name: "upscore_pool4_sem"
-  type: "Deconvolution"
-  bottom: "fuse_pool4_sem"
-  top: "upscore_pool4_sem"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 33
-    bias_term: false
-    kernel_size: 4
-    stride: 2
-  }
-}
-layer {
-  name: "score_pool3_sem"
-  type: "Convolution"
-  bottom: "pool3"
-  top: "score_pool3_sem"
-  param {
-    lr_mult: 1
-    decay_mult: 1
-  }
-  param {
-    lr_mult: 2
-    decay_mult: 0
-  }
-  convolution_param {
-    num_output: 33
-    pad: 0
-    kernel_size: 1
-  }
-}
-layer {
-  name: "score_pool3_semc"
-  type: "Crop"
-  bottom: "score_pool3_sem"
-  bottom: "upscore_pool4_sem"
-  top: "score_pool3_semc"
-  crop_param {
-    axis: 2
-    offset: 9
-  }
-}
-layer {
-  name: "fuse_pool3_sem"
-  type: "Eltwise"
-  bottom: "upscore_pool4_sem"
-  bottom: "score_pool3_semc"
-  top: "fuse_pool3_sem"
-  eltwise_param {
-    operation: SUM
-  }
-}
-layer {
-  name: "upscore8_sem"
-  type: "Deconvolution"
-  bottom: "fuse_pool3_sem"
-  top: "upscore8_sem"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 33
-    bias_term: false
-    kernel_size: 16
-    stride: 8
-  }
-}
-layer {
-  name: "score_sem"
-  type: "Crop"
-  bottom: "upscore8_sem"
-  bottom: "data"
-  top: "score_sem"
-  crop_param {
-    axis: 2
-    offset: 31
-  }
-}
-layer {
-  name: "loss"
-  type: "SoftmaxWithLoss"
-  bottom: "score_sem"
-  bottom: "sem"
-  top: "loss"
-  loss_param {
-    ignore_label: 255
-    normalize: false
-  }
-}
-layer {
   name: "score_fr_geo"
   type: "Convolution"
   bottom: "fc7"
@@ -777,7 +627,7 @@ layer {
     lr_mult: 0
   }
   convolution_param {
-    num_output: 3
+    num_output: 2
     bias_term: false
     kernel_size: 16
     stride: 8
