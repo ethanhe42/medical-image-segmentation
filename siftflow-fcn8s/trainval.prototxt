@@ -7,7 +7,7 @@ layer {
     scale: 0.00392156862745
   }
   data_param {
-    source: "train"
+    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data/data.mdb"
     batch_size: 64
     backend: LMDB
   }
@@ -21,7 +21,7 @@ layer {
     scale: 0.00392156862745
   }
   data_param {
-    source: "mask"
+    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask/data.mdb"
     batch_size: 64
     backend: LMDB
   }
