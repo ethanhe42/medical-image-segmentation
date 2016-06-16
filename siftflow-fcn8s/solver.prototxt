@@ -1,13 +1,12 @@
 train_net: "trainval.prototxt"
 test_net: "test.prototxt"
-test_iter: 200
-# make test net, but don't invoke it from the solver itself
-test_interval: 999999999
+test_iter: 20
+test_interval: 1000
 display: 20
 average_loss: 20
 lr_policy: "fixed"
 # lr for unnormalized softmax
-base_lr: 1e-12
+base_lr: 1e-11
 # high momentum
 momentum: 0.99
 # no gradient accumulation

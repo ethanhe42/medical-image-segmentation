@@ -7,7 +7,7 @@ layer {
   }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data"
-    batch_size: 64
+    batch_size: 16
     backend: LMDB
   }
 }
@@ -17,7 +17,7 @@ layer {
   top: "geo"
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask"
-    batch_size: 64
+    batch_size: 16
     backend: LMDB
   }
 }
@@ -36,9 +36,12 @@ layer {
   }
   convolution_param {
     num_output: 64
-    pad: 1
+    pad: 100
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -65,6 +68,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -102,6 +108,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -128,6 +137,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -165,6 +177,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -191,6 +206,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -217,6 +235,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -254,6 +275,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -280,6 +304,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -306,6 +333,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -343,6 +373,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -369,6 +402,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -395,6 +431,9 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -432,6 +471,9 @@ layer {
     pad: 0
     kernel_size: 7
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -467,6 +509,9 @@ layer {
     pad: 0
     kernel_size: 1
     stride: 1
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -516,6 +561,9 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -571,6 +619,9 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
+    weight_filler {
+      type: "msra"
+    }
   }
 }
 layer {
@@ -614,18 +665,43 @@ layer {
   }
 }
 layer {
-  name: "score_geo"
+  name: "upscore8_geo"
   type: "Deconvolution"
   bottom: "fuse_pool3_geo"
-  top: "score_geo"
+  top: "upscore8_geo"
   param {
     lr_mult: 0
   }
   convolution_param {
     num_output: 2
     bias_term: false
-    kernel_size: 24
+    kernel_size: 16
     stride: 8
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
+  name: "Crop1"
+  type: "Crop"
+  bottom: "upscore8_geo"
+  bottom: "data"
+  top: "Crop1"
+  crop_param {
+    axis: 2
+    offset: 31
+  }
+}
+layer {
+  name: "score_geo"
+  type: "Pooling"
+  bottom: "Crop1"
+  top: "score_geo"
+  pooling_param {
+    pool: MAX
+    kernel_size: 2
+    stride: 2
   }
 }
 layer {
@@ -635,7 +711,6 @@ layer {
   bottom: "geo"
   top: "loss_geo"
   loss_param {
-    ignore_label: 255
     normalize: false
   }
 }

@@ -5,7 +5,8 @@ from caffe.coord_map import crop
 def conv_relu(bottom, nout, ks=3, stride=1, pad=1):
     conv = L.Convolution(bottom, kernel_size=ks, stride=stride,
         num_output=nout, pad=pad,
-        param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
+        param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)],
+        weight_filler=dict(type='msra'))
     return conv, L.ReLU(conv, in_place=True)
 
 def max_pool(bottom, ks=2, stride=2):
@@ -17,14 +18,15 @@ def fcn(train,mask):
     #         layer='SIFTFlowSegDataLayer', ntop=3,
     #         param_str=str(dict(siftflow_dir='../data/sift-flow',
     #             split=split, seed=1337)))
-    n.data =L.Data(backend=P.Data.LMDB,batch_size=64, source=train,
+    batch_size=16
+    n.data =L.Data(backend=P.Data.LMDB,batch_size=batch_size, source=train,
                              transform_param=dict(scale=1./255),ntop=1
                   )
 
-    n.geo = L.Data(backend=P.Data.LMDB, batch_size=64, source=mask,
+    n.geo = L.Data(backend=P.Data.LMDB, batch_size=batch_size, source=mask,
                          ntop=1)
     # the base net
-    n.conv1_1, n.relu1_1 = conv_relu(n.data, 64)#,pad=100)
+    n.conv1_1, n.relu1_1 = conv_relu(n.data, 64,pad=100)
     n.conv1_2, n.relu1_2 = conv_relu(n.relu1_1, 64)
     n.pool1 = max_pool(n.relu1_2)
 
@@ -59,8 +61,11 @@ def fcn(train,mask):
 
     n.upscore2_geo = L.Deconvolution(n.score_fr_geo,
         convolution_param=dict(num_output=2, kernel_size=4, stride=2,
-            bias_term=False),
-        param=[dict(lr_mult=0)])
+            bias_term=False,
+            weight_filler=dict(type="msra")
+            ),
+        param=[dict(lr_mult=0)],
+        )
 
     n.score_pool4_geo = L.Convolution(n.pool4, num_output=2, kernel_size=1, pad=0,
         param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
@@ -69,7 +74,9 @@ def fcn(train,mask):
             operation=P.Eltwise.SUM)
     n.upscore_pool4_geo  = L.Deconvolution(n.fuse_pool4_geo,
         convolution_param=dict(num_output=2, kernel_size=4, stride=2,
-            bias_term=False),
+            bias_term=False,
+            weight_filler=dict(type="msra")
+            ),
         param=[dict(lr_mult=0)])
 
     n.score_pool3_geo = L.Convolution(n.pool3, num_output=2, kernel_size=1,
@@ -79,14 +86,16 @@ def fcn(train,mask):
     n.fuse_pool3_geo = L.Eltwise(n.upscore_pool4_geo, n.score_pool3_geoc,
             operation=P.Eltwise.SUM)
     n.upscore8_geo = L.Deconvolution(n.fuse_pool3_geo,
-        convolution_param=dict(num_output=2, kernel_size=24, stride=8,#ks 16
-            bias_term=False),
+        convolution_param=dict(num_output=2, kernel_size=16, stride=8,#ks 16
+            bias_term=False,
+            weight_filler=dict(type="msra")
+            ),
         param=[dict(lr_mult=0)])
 
-    #n.score_geo = max_pool(crop(n.upscore8_geo, n.data))
-    n.score_geo = n.upscore8_geo
+    n.score_geo = max_pool(crop(n.upscore8_geo, n.data))
+    #n.score_geo = n.upscore8_geo
     n.loss_geo = L.SoftmaxWithLoss(n.score_geo, n.geo,
-            loss_param=dict(normalize=False, ignore_label=255))
+            loss_param=dict(normalize=False))#, ignore_label=255))
 
     return n.to_proto()
 

@@ -12,9 +12,9 @@ import surgery
 weights = 'siftflow-fcn8s-heavy.caffemodel'
 
 # init
-# caffe.set_device(int(sys.argv[1]))
-# caffe.set_mode_gpu()
-caffe.set_mode_cpu()
+caffe.set_device(int(sys.argv[1]))
+caffe.set_mode_gpu()
+# caffe.set_mode_cpu()
 
 solver = caffe.SGDSolver('solver.prototxt')
 #solver.net.copy_from(weights)
@@ -31,6 +31,7 @@ test = np.loadtxt('../data/sift-flow/test.txt', dtype=str)
 #exit()
 for _ in range(50*2000):
     solver.step(1)
+    # print solver.net.blobs['fuse_pool3_geo'].data
     # N.B. metrics on the semantic labels are off b.c. of missing classes;
     # score manually from the histogram instead for proper evaluation
     # score.seg_tests(solver, False, test, layer='score_geo', gt='geo')
