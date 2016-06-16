@@ -12,13 +12,13 @@ def conv_relu(bottom, nout, ks=3, stride=1, pad=1):
 def max_pool(bottom, ks=2, stride=2):
     return L.Pooling(bottom, pool=P.Pooling.MAX, kernel_size=ks, stride=stride)
 
-def fcn(train,mask):
+def fcn(train,mask,batch_size=16):
     n = caffe.NetSpec()
     # n.data, n.sem, n.geo = L.Python(module='siftflow_layers',
     #         layer='SIFTFlowSegDataLayer', ntop=3,
     #         param_str=str(dict(siftflow_dir='../data/sift-flow',
     #             split=split, seed=1337)))
-    batch_size=16
+
     n.data =L.Data(backend=P.Data.LMDB,batch_size=batch_size, source=train,
                              transform_param=dict(scale=1./255),ntop=1
                   )
@@ -104,7 +104,7 @@ def make_net():
         f.write(str(fcn('/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data','/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask')))
 
     with open('test.prototxt', 'w') as f:
-        f.write(str(fcn('/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data','/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask')))
+        f.write(str(fcn('/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data','/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask',1)))
 
 if __name__ == '__main__':
     make_net()

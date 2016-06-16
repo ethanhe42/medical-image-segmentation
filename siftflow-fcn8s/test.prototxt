@@ -7,7 +7,7 @@ layer {
   }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data"
-    batch_size: 16
+    batch_size: 1
     backend: LMDB
   }
 }
@@ -17,7 +17,7 @@ layer {
   top: "geo"
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask"
-    batch_size: 16
+    batch_size: 1
     backend: LMDB
   }
 }
