@@ -50,15 +50,19 @@ def fcn(train,mask,batch_size=16):
     n.pool5 = max_pool(n.relu5_3)
 
     # fully conv
+   # n.fc6, n.relu6 = conv_relu(n.pool5, 4096, ks=7, pad=0)
+   # n.fc7, n.relu7 = conv_relu(n.relu6, 4096, ks=1, pad=0)
+
     n.fc6, n.relu6 = conv_relu(n.pool5, 4096, ks=7, pad=0)
     n.drop6 = L.Dropout(n.relu6, dropout_ratio=0.5, in_place=True)
     n.fc7, n.relu7 = conv_relu(n.drop6, 4096, ks=1, pad=0)
     n.drop7 = L.Dropout(n.relu7, dropout_ratio=0.5, in_place=True)
-
     # upsampling
+    #n.score_fr_geo = L.Convolution(n.relu7, num_output=2, kernel_size=1, pad=0,
+    #   param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
+
     n.score_fr_geo = L.Convolution(n.drop7, num_output=2, kernel_size=1, pad=0,
         param=[dict(lr_mult=1, decay_mult=1), dict(lr_mult=2, decay_mult=0)])
-
     n.upscore2_geo = L.Deconvolution(n.score_fr_geo,
         convolution_param=dict(num_output=2, kernel_size=4, stride=2,
             bias_term=False,

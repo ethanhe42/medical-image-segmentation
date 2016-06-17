@@ -1,25 +1,11 @@
 layer {
   name: "data"
-  type: "Data"
+  type: "Input"
   top: "data"
   transform_param {
     scale: 0.00392156862745
   }
-  data_param {
-    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data"
-    batch_size: 16
-    backend: LMDB
-  }
-}
-layer {
-  name: "geo"
-  type: "Data"
-  top: "geo"
-  data_param {
-    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask"
-    batch_size: 16
-    backend: LMDB
-  }
+  input_param { shape: { dim: 1 dim: 3 dim: 256 dim: 256 } }
 }
 layer {
   name: "conv1_1"
@@ -39,9 +25,6 @@ layer {
     pad: 100
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -68,9 +51,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -108,9 +88,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -137,9 +114,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -177,9 +151,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -206,9 +177,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -235,9 +203,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -275,9 +240,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -304,9 +266,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -333,9 +292,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -373,9 +329,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -402,9 +355,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -431,9 +381,6 @@ layer {
     pad: 1
     kernel_size: 3
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -471,9 +418,6 @@ layer {
     pad: 0
     kernel_size: 7
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -509,9 +453,6 @@ layer {
     pad: 0
     kernel_size: 1
     stride: 1
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -561,9 +502,6 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -619,9 +557,6 @@ layer {
     bias_term: false
     kernel_size: 4
     stride: 2
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -677,9 +612,6 @@ layer {
     bias_term: false
     kernel_size: 16
     stride: 8
-    weight_filler {
-      type: "msra"
-    }
   }
 }
 layer {
@@ -705,12 +637,9 @@ layer {
   }
 }
 layer {
-  name: "loss_geo"
-  type: "SoftmaxWithLoss"
+  name: "prob"
+  type: "Softmax"
   bottom: "score_geo"
-  bottom: "geo"
-  top: "loss_geo"
-  loss_param {
-    normalize: true
-  }
+  top: "prob"
 }
+

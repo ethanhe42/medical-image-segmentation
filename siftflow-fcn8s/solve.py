@@ -25,12 +25,9 @@ surgery.interp(solver.net, interp_layers)
 
 # scoring
 test = np.loadtxt('../data/sift-flow/test.txt', dtype=str)
-#print "step"
-#print solver.net.params
 
 for _ in range(50*2000):
-    solver.step(1,start="conv1_1")
-        
+    solver.step(1)
     # N.B. metrics on the semantic labels are off b.c. of missing classes;
     # score manually from the histogram instead for proper evaluation
     # score.seg_tests(solver, False, test, layer='score_geo', gt='geo')

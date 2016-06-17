@@ -711,6 +711,6 @@ layer {
   bottom: "geo"
   top: "loss_geo"
   loss_param {
-    normalize: false
+    normalize: true
   }
 }
