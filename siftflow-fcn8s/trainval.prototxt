@@ -7,7 +7,7 @@ layer {
   }
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_data"
-    batch_size: 16
+    batch_size: 8
     backend: LMDB
   }
 }
@@ -17,7 +17,7 @@ layer {
   top: "geo"
   data_param {
     source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/train_mask"
-    batch_size: 16
+    batch_size: 8
     backend: LMDB
   }
 }
@@ -543,7 +543,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 2
+    num_output: 300
     pad: 0
     kernel_size: 1
   }
@@ -557,7 +557,7 @@ layer {
     lr_mult: 0
   }
   convolution_param {
-    num_output: 2
+    num_output: 300
     bias_term: false
     kernel_size: 4
     stride: 2
@@ -580,7 +580,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 2
+    num_output: 300
     pad: 0
     kernel_size: 1
   }
@@ -615,7 +615,7 @@ layer {
     lr_mult: 0
   }
   convolution_param {
-    num_output: 2
+    num_output: 300
     bias_term: false
     kernel_size: 4
     stride: 2
@@ -638,7 +638,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 2
+    num_output: 300
     pad: 0
     kernel_size: 1
   }
@@ -673,7 +673,7 @@ layer {
     lr_mult: 0
   }
   convolution_param {
-    num_output: 2
+    num_output: 300
     bias_term: false
     kernel_size: 16
     stride: 8
@@ -683,9 +683,32 @@ layer {
   }
 }
 layer {
+  name: "Convolution1"
+  type: "Convolution"
+  bottom: "upscore8_geo"
+  top: "Convolution1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    pad: 1
+    kernel_size: 3
+    stride: 1
+    weight_filler {
+      type: "msra"
+    }
+  }
+}
+layer {
   name: "Crop1"
   type: "Crop"
-  bottom: "upscore8_geo"
+  bottom: "Convolution1"
   bottom: "data"
   top: "Crop1"
   crop_param {
@@ -711,6 +734,6 @@ layer {
   bottom: "geo"
   top: "loss_geo"
   loss_param {
-    normalize: true
+    normalize: false
   }
 }

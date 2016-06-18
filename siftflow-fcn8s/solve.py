@@ -6,6 +6,7 @@ import numpy as np
 import score
 import surgery
 
+debug=False
 # import setproctitle
 # setproctitle.setproctitle(os.path.basename(os.getcwd()))
 
@@ -28,6 +29,9 @@ test = np.loadtxt('../data/sift-flow/test.txt', dtype=str)
 
 for _ in range(50*2000):
     solver.step(1)
+    if debug:
+        for i in solver.net.blobs:
+            print i,solver.net.blobs[i].data
     # N.B. metrics on the semantic labels are off b.c. of missing classes;
     # score manually from the histogram instead for proper evaluation
     # score.seg_tests(solver, False, test, layer='score_geo', gt='geo')
