@@ -1,2 +1,6 @@
 # segmentation for medical image
-Fully Convolutional Models for Semantic Segmentation
+
+### related work
+1. Fully Convolutional Models for Semantic Segmentation
+2. Deconvolutional Networks 
+3. 
