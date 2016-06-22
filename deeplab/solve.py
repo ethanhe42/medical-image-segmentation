@@ -1,6 +1,9 @@
 import sys
 sys.path.append("/home/yihuihe/medical-image-segmentation")
+sys.path.insert(0, "/home/yihuihe/deeplab-public-ver2/python")
+print sys.path
 import caffe
+print caffe.__file__
 import numpy as np
 
 import score
@@ -10,7 +13,7 @@ debug=False
 # import setproctitle
 # setproctitle.setproctitle(os.path.basename(os.getcwd()))
 
-weights = 'siftflow-fcn8s-heavy.caffemodel'
+weights = 'init.caffemodel'
 
 # init
 caffe.set_device(int(sys.argv[1]))
@@ -18,7 +21,7 @@ caffe.set_mode_gpu()
 # caffe.set_mode_cpu()
 
 solver = caffe.SGDSolver('solver.prototxt')
-#solver.net.copy_from(weights)
+solver.net.copy_from(weights)
 
 # surgeries
 interp_layers = [k for k in solver.net.params.keys() if 'up' in k]

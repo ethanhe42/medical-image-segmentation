@@ -1,44 +1,59 @@
 # VGG 16-layer network convolutional finetuning
 # Network modified to have smaller receptive field (128 pixels)
-# and smaller stride (8 pixels) when run in convolutional mode.
+# nand smaller stride (8 pixels) when run in convolutional mode.
 #
 # In this model we also change max pooling size in the first 4 layers
 # from 2 to 3 while retaining stride = 2
 # which makes it easier to exactly align responses at different layers.
 #
+# For alignment to work, we set (we choose 32x so as to be able to evaluate
+# the model for all different subsampling sizes):
+# (1) input dimension equal to
+# $n = 32 * k - 31$, e.g., 321 (for k = 11)
+# Dimension after pooling w. subsampling:
+# (16 * k - 15); (8 * k - 7); (4 * k - 3); (2 * k - 1); (k).
+# For k = 11, these translate to
+#           161;          81;          41;          21;  11
+# 
 
 name: "vgg128_noup"
-
 layer {
   name: "data"
-  type: "ImageSegData"
+  type: "Data"
   top: "data"
-  top: "label"
-  top: "data_dim"
-  include {
-    phase: TEST
-  }
   transform_param {
-    mirror: false
-    crop_size: 513
-    mean_value: 104.008
-    mean_value: 116.669
-    mean_value: 122.675
+    scale: 0.00392156862745
   }
-  image_data_param {
-    root_folder: "/home/eli/work/data/VOCdevkit/VOC2012"
-    source: "voc12/list/val.txt"
-    batch_size: 1
-    label_type: NONE
+  data_param {
+    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_data"
+    batch_size: 8
+    backend: LMDB
   }
 }
-
-###################### DeepLab ##########################
+layer {
+  name: "geo"
+  type: "Data"
+  top: "geo"
+  data_param {
+    source: "/mnt/data1/yihuihe/selected_data/gen_shantian12_pos_and_neg/lmdb_train_val/val_mask"
+    batch_size: 8
+    backend: LMDB
+  }
+}
+###################### DeepLab ####################
 layer {
   name: "conv1_1"
   type: "Convolution"
   bottom: "data"
   top: "conv1_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 64
     pad: 1
@@ -56,6 +71,14 @@ layer {
   type: "Convolution"
   bottom: "conv1_1"
   top: "conv1_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 64
     pad: 1
@@ -85,6 +108,14 @@ layer {
   type: "Convolution"
   bottom: "pool1"
   top: "conv2_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 128
     pad: 1
@@ -102,6 +133,14 @@ layer {
   type: "Convolution"
   bottom: "conv2_1"
   top: "conv2_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 128
     pad: 1
@@ -131,6 +170,14 @@ layer {
   type: "Convolution"
   bottom: "pool2"
   top: "conv3_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 256
     pad: 1
@@ -148,6 +195,14 @@ layer {
   type: "Convolution"
   bottom: "conv3_1"
   top: "conv3_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 256
     pad: 1
@@ -165,6 +220,14 @@ layer {
   type: "Convolution"
   bottom: "conv3_2"
   top: "conv3_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 256
     pad: 1
@@ -194,6 +257,14 @@ layer {
   type: "Convolution"
   bottom: "pool3"
   top: "conv4_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -211,6 +282,14 @@ layer {
   type: "Convolution"
   bottom: "conv4_1"
   top: "conv4_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -228,6 +307,14 @@ layer {
   type: "Convolution"
   bottom: "conv4_2"
   top: "conv4_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 1
@@ -257,6 +344,14 @@ layer {
   type: "Convolution"
   bottom: "pool4"
   top: "conv5_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 2
@@ -275,6 +370,14 @@ layer {
   type: "Convolution"
   bottom: "conv5_1"
   top: "conv5_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 2
@@ -293,6 +396,14 @@ layer {
   type: "Convolution"
   bottom: "conv5_2"
   top: "conv5_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 512
     pad: 2
@@ -306,6 +417,7 @@ layer {
   bottom: "conv5_3"
   top: "conv5_3"
 }
+
 layer {
   bottom: "conv5_3"
   top: "pool5"
@@ -325,6 +437,14 @@ layer {
   type: "Convolution"
   bottom: "pool5"
   top: "fc6_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     pad: 6
@@ -352,6 +472,14 @@ layer {
   type: "Convolution"
   bottom: "fc6_1"
   top: "fc7_1"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     kernel_size: 1
@@ -377,9 +505,25 @@ layer {
   type: "Convolution"
   bottom: "fc7_1"
   top: "fc8_voc12_1"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
   convolution_param {
-    num_output: 21
+    num_output: 2
     kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
   }
 }
 
@@ -389,6 +533,14 @@ layer {
   type: "Convolution"
   bottom: "pool5"
   top: "fc6_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     pad: 12
@@ -416,6 +568,14 @@ layer {
   type: "Convolution"
   bottom: "fc6_2"
   top: "fc7_2"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     kernel_size: 1
@@ -441,9 +601,25 @@ layer {
   type: "Convolution"
   bottom: "fc7_2"
   top: "fc8_voc12_2"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
   convolution_param {
-    num_output: 21
+    num_output: 2
     kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
   }
 }
 
@@ -453,6 +629,14 @@ layer {
   type: "Convolution"
   bottom: "pool5"
   top: "fc6_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     pad: 18
@@ -480,6 +664,14 @@ layer {
   type: "Convolution"
   bottom: "fc6_3"
   top: "fc7_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     kernel_size: 1
@@ -505,9 +697,25 @@ layer {
   type: "Convolution"
   bottom: "fc7_3"
   top: "fc8_voc12_3"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
   convolution_param {
-    num_output: 21
+    num_output: 2
     kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
   }
 }
 
@@ -517,6 +725,14 @@ layer {
   type: "Convolution"
   bottom: "pool5"
   top: "fc6_4"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     pad: 24
@@ -544,6 +760,14 @@ layer {
   type: "Convolution"
   bottom: "fc6_4"
   top: "fc7_4"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
   convolution_param {
     num_output: 1024
     kernel_size: 1
@@ -569,9 +793,25 @@ layer {
   type: "Convolution"
   bottom: "fc7_4"
   top: "fc8_voc12_4"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
   convolution_param {
-    num_output: 21
+    num_output: 2
     kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
   }
 }
 
@@ -588,43 +828,61 @@ layer {
     operation: SUM
   }
 }
-## original resolution
+
 layer {
-  name: "fc8_interp"
-  type: "Interp"
+  name: "convf"
+  type: "Convolution"
   bottom: "fc8_voc12"
-  top: "fc8_interp"
+  top: "convf"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    pad: 0
+    kernel_size: 2
+  }
+}
+#################
+layer {
+  bottom: "geo"
+  top: "geo_shrink"
+  name: "geo_shrink"
+  type: "Interp"
   interp_param {
-    zoom_factor: 8
+    shrink_factor: 4
+    pad_beg: 0
+    pad_end: 0
   }
 }
-# layer {
-#   bottom: "fc8_interp"
-#   top: "fc8_interp_argmax"
-#   name: "fc8_interp_argmax"
-#   type: "ArgMax"
-#   argmax_param {
-#     axis: 1
-#   }
-# }
+#layer {
+#  bottom: "geo"
+#  top: "geo_shrink"
+#  name: "geo_shrink"
+#  type: "Pooling"
+#  pooling_param {
+#    pool: AVE
+#    kernel_size:4
+#    stride: 4
+#    pad: 2 # TODO: ok? blank
+#  }
+#}
 layer {
-  name: "fc8_mat"
-  type: "MatWrite"
-#  bottom: "fc8_interp_argmax"
-  bottom: "fc8_interp"
-  include {
-    phase: TEST
-  }
-  mat_write_param {
-    prefix: "voc12/features/vgg128_noup/val/fc8/"
-    source: "voc12/list/val_id.txt"
-    strip: 0
-    period: 1
+  name: "loss_geo"
+  type: "SoftmaxWithLoss"
+#  bottom: "fc8_voc12"
+  bottom: "convf"
+  bottom: "geo_shrink"
+  top: "loss_geo"
+  loss_param {
+    ignore_label: 255
+    normalize: false
   }
 }
-layer {
-  name: "silence"
-  type: "Silence"
-  bottom: "label"
-  bottom: "data_dim"
-}
+
+

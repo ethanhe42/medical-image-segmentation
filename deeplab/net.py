@@ -1,3 +1,4 @@
+# by yihui
 import caffe
 from caffe import layers as L, params as P
 from caffe.coord_map import crop

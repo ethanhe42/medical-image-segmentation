@@ -7,6 +7,8 @@ layer {
   }
   input_param { shape: { dim: 1 dim: 3 dim: 256 dim: 256 } }
 }
+
+###################### DeepLab ####################
 layer {
   name: "conv1_1"
   type: "Convolution"
@@ -22,9 +24,8 @@ layer {
   }
   convolution_param {
     num_output: 64
-    pad: 100
+    pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -50,7 +51,6 @@ layer {
     num_output: 64
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -66,8 +66,9 @@ layer {
   top: "pool1"
   pooling_param {
     pool: MAX
-    kernel_size: 2
+    kernel_size: 3
     stride: 2
+    pad: 1
   }
 }
 layer {
@@ -87,7 +88,6 @@ layer {
     num_output: 128
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -113,7 +113,6 @@ layer {
     num_output: 128
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -129,8 +128,9 @@ layer {
   top: "pool2"
   pooling_param {
     pool: MAX
-    kernel_size: 2
+    kernel_size: 3
     stride: 2
+    pad: 1
   }
 }
 layer {
@@ -150,7 +150,6 @@ layer {
     num_output: 256
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -176,7 +175,6 @@ layer {
     num_output: 256
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -202,7 +200,6 @@ layer {
     num_output: 256
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -218,8 +215,9 @@ layer {
   top: "pool3"
   pooling_param {
     pool: MAX
-    kernel_size: 2
+    kernel_size: 3
     stride: 2
+    pad: 1
   }
 }
 layer {
@@ -239,7 +237,6 @@ layer {
     num_output: 512
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -265,7 +262,6 @@ layer {
     num_output: 512
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -291,7 +287,6 @@ layer {
     num_output: 512
     pad: 1
     kernel_size: 3
-    stride: 1
   }
 }
 layer {
@@ -301,14 +296,15 @@ layer {
   top: "conv4_3"
 }
 layer {
-  name: "pool4"
-  type: "Pooling"
   bottom: "conv4_3"
   top: "pool4"
+  name: "pool4"
+  type: "Pooling"
   pooling_param {
     pool: MAX
-    kernel_size: 2
-    stride: 2
+    kernel_size: 3
+    pad: 1
+    stride: 1
   }
 }
 layer {
@@ -326,9 +322,9 @@ layer {
   }
   convolution_param {
     num_output: 512
-    pad: 1
+    pad: 2
     kernel_size: 3
-    stride: 1
+    dilation: 2
   }
 }
 layer {
@@ -352,9 +348,9 @@ layer {
   }
   convolution_param {
     num_output: 512
-    pad: 1
+    pad: 2
     kernel_size: 3
-    stride: 1
+    dilation: 2
   }
 }
 layer {
@@ -378,9 +374,9 @@ layer {
   }
   convolution_param {
     num_output: 512
-    pad: 1
+    pad: 2
     kernel_size: 3
-    stride: 1
+    dilation: 2
   }
 }
 layer {
@@ -389,22 +385,26 @@ layer {
   bottom: "conv5_3"
   top: "conv5_3"
 }
+
 layer {
-  name: "pool5"
-  type: "Pooling"
   bottom: "conv5_3"
   top: "pool5"
+  name: "pool5"
+  type: "Pooling"
   pooling_param {
     pool: MAX
-    kernel_size: 2
-    stride: 2
+    kernel_size: 3
+    stride: 1
+    pad: 1
   }
 }
+
+### hole = 6
 layer {
-  name: "fc6"
+  name: "fc6_1"
   type: "Convolution"
   bottom: "pool5"
-  top: "fc6"
+  top: "fc6_1"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -414,32 +414,32 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 4096
-    pad: 0
-    kernel_size: 7
-    stride: 1
+    num_output: 1024
+    pad: 6
+    kernel_size: 3
+    dilation: 6
   }
 }
 layer {
-  name: "relu6"
+  name: "relu6_1"
   type: "ReLU"
-  bottom: "fc6"
-  top: "fc6"
+  bottom: "fc6_1"
+  top: "fc6_1"
 }
 layer {
-  name: "drop6"
+  name: "drop6_1"
   type: "Dropout"
-  bottom: "fc6"
-  top: "fc6"
+  bottom: "fc6_1"
+  top: "fc6_1"
   dropout_param {
     dropout_ratio: 0.5
   }
 }
 layer {
-  name: "fc7"
+  name: "fc7_1"
   type: "Convolution"
-  bottom: "fc6"
-  top: "fc7"
+  bottom: "fc6_1"
+  top: "fc7_1"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -449,32 +449,58 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 4096
-    pad: 0
+    num_output: 1024
     kernel_size: 1
-    stride: 1
   }
 }
 layer {
-  name: "relu7"
+  name: "relu7_1"
   type: "ReLU"
-  bottom: "fc7"
-  top: "fc7"
+  bottom: "fc7_1"
+  top: "fc7_1"
 }
 layer {
-  name: "drop7"
+  name: "drop7_1"
   type: "Dropout"
-  bottom: "fc7"
-  top: "fc7"
+  bottom: "fc7_1"
+  top: "fc7_1"
   dropout_param {
     dropout_ratio: 0.5
   }
 }
 layer {
-  name: "score_fr_geo"
+  name: "fc8_voc12_1"
   type: "Convolution"
-  bottom: "fc7"
-  top: "score_fr_geo"
+  bottom: "fc7_1"
+  top: "fc8_voc12_1"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+### hole = 12
+layer {
+  name: "fc6_2"
+  type: "Convolution"
+  bottom: "pool5"
+  top: "fc6_2"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -484,31 +510,32 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 2
-    pad: 0
-    kernel_size: 1
+    num_output: 1024
+    pad: 12
+    kernel_size: 3
+    dilation: 12
   }
 }
 layer {
-  name: "upscore2_geo"
-  type: "Deconvolution"
-  bottom: "score_fr_geo"
-  top: "upscore2_geo"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 4
-    stride: 2
+  name: "relu6_2"
+  type: "ReLU"
+  bottom: "fc6_2"
+  top: "fc6_2"
+}
+layer {
+  name: "drop6_2"
+  type: "Dropout"
+  bottom: "fc6_2"
+  top: "fc6_2"
+  dropout_param {
+    dropout_ratio: 0.5
   }
 }
 layer {
-  name: "score_pool4_geo"
+  name: "fc7_2"
   type: "Convolution"
-  bottom: "pool4"
-  top: "score_pool4_geo"
+  bottom: "fc6_2"
+  top: "fc7_2"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -518,52 +545,263 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 2
-    pad: 0
+    num_output: 1024
     kernel_size: 1
   }
 }
 layer {
-  name: "score_pool4_geoc"
-  type: "Crop"
-  bottom: "score_pool4_geo"
-  bottom: "upscore2_geo"
-  top: "score_pool4_geoc"
-  crop_param {
-    axis: 2
-    offset: 5
+  name: "relu7_2"
+  type: "ReLU"
+  bottom: "fc7_2"
+  top: "fc7_2"
+}
+layer {
+  name: "drop7_2"
+  type: "Dropout"
+  bottom: "fc7_2"
+  top: "fc7_2"
+  dropout_param {
+    dropout_ratio: 0.5
   }
 }
 layer {
-  name: "fuse_pool4_geo"
+  name: "fc8_voc12_2"
+  type: "Convolution"
+  bottom: "fc7_2"
+  top: "fc8_voc12_2"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+### hole = 18
+layer {
+  name: "fc6_3"
+  type: "Convolution"
+  bottom: "pool5"
+  top: "fc6_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 1024
+    pad: 18
+    kernel_size: 3
+    dilation: 18
+  }
+}
+layer {
+  name: "relu6_3"
+  type: "ReLU"
+  bottom: "fc6_3"
+  top: "fc6_3"
+}
+layer {
+  name: "drop6_3"
+  type: "Dropout"
+  bottom: "fc6_3"
+  top: "fc6_3"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7_3"
+  type: "Convolution"
+  bottom: "fc6_3"
+  top: "fc7_3"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 1024
+    kernel_size: 1
+  }
+}
+layer {
+  name: "relu7_3"
+  type: "ReLU"
+  bottom: "fc7_3"
+  top: "fc7_3"
+}
+layer {
+  name: "drop7_3"
+  type: "Dropout"
+  bottom: "fc7_3"
+  top: "fc7_3"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc8_voc12_3"
+  type: "Convolution"
+  bottom: "fc7_3"
+  top: "fc8_voc12_3"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+### hole = 24
+layer {
+  name: "fc6_4"
+  type: "Convolution"
+  bottom: "pool5"
+  top: "fc6_4"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 1024
+    pad: 24
+    kernel_size: 3
+    dilation: 24
+  }
+}
+layer {
+  name: "relu6_4"
+  type: "ReLU"
+  bottom: "fc6_4"
+  top: "fc6_4"
+}
+layer {
+  name: "drop6_4"
+  type: "Dropout"
+  bottom: "fc6_4"
+  top: "fc6_4"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc7_4"
+  type: "Convolution"
+  bottom: "fc6_4"
+  top: "fc7_4"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 1024
+    kernel_size: 1
+  }
+}
+layer {
+  name: "relu7_4"
+  type: "ReLU"
+  bottom: "fc7_4"
+  top: "fc7_4"
+}
+layer {
+  name: "drop7_4"
+  type: "Dropout"
+  bottom: "fc7_4"
+  top: "fc7_4"
+  dropout_param {
+    dropout_ratio: 0.5
+  }
+}
+layer {
+  name: "fc8_voc12_4"
+  type: "Convolution"
+  bottom: "fc7_4"
+  top: "fc8_voc12_4"
+  param {
+    lr_mult: 10
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 20
+    decay_mult: 0
+  }
+  convolution_param {
+    num_output: 2
+    kernel_size: 1
+    weight_filler {
+      type: "gaussian"
+      std: 0.01
+    }
+    bias_filler {
+      type: "constant"
+      value: 0
+    }
+  }
+}
+
+### SUM the four branches
+layer {
+  bottom: "fc8_voc12_1"
+  bottom: "fc8_voc12_2"
+  bottom: "fc8_voc12_3"
+  bottom: "fc8_voc12_4"
+  top: "fc8_voc12"
+  name: "fc8_voc12"
   type: "Eltwise"
-  bottom: "upscore2_geo"
-  bottom: "score_pool4_geoc"
-  top: "fuse_pool4_geo"
   eltwise_param {
     operation: SUM
   }
 }
+
 layer {
-  name: "upscore_pool4_geo"
-  type: "Deconvolution"
-  bottom: "fuse_pool4_geo"
-  top: "upscore_pool4_geo"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 4
-    stride: 2
-  }
-}
-layer {
-  name: "score_pool3_geo"
+  name: "convf"
   type: "Convolution"
-  bottom: "pool3"
-  top: "score_pool3_geo"
+  bottom: "fc8_voc12"
+  top: "convf"
   param {
     lr_mult: 1
     decay_mult: 1
@@ -575,71 +813,14 @@ layer {
   convolution_param {
     num_output: 2
     pad: 0
-    kernel_size: 1
-  }
-}
-layer {
-  name: "score_pool3_geoc"
-  type: "Crop"
-  bottom: "score_pool3_geo"
-  bottom: "upscore_pool4_geo"
-  top: "score_pool3_geoc"
-  crop_param {
-    axis: 2
-    offset: 9
-  }
-}
-layer {
-  name: "fuse_pool3_geo"
-  type: "Eltwise"
-  bottom: "upscore_pool4_geo"
-  bottom: "score_pool3_geoc"
-  top: "fuse_pool3_geo"
-  eltwise_param {
-    operation: SUM
-  }
-}
-layer {
-  name: "upscore8_geo"
-  type: "Deconvolution"
-  bottom: "fuse_pool3_geo"
-  top: "upscore8_geo"
-  param {
-    lr_mult: 0
-  }
-  convolution_param {
-    num_output: 2
-    bias_term: false
-    kernel_size: 16
-    stride: 8
-  }
-}
-layer {
-  name: "Crop1"
-  type: "Crop"
-  bottom: "upscore8_geo"
-  bottom: "data"
-  top: "Crop1"
-  crop_param {
-    axis: 2
-    offset: 31
-  }
-}
-layer {
-  name: "score_geo"
-  type: "Pooling"
-  bottom: "Crop1"
-  top: "score_geo"
-  pooling_param {
-    pool: MAX
     kernel_size: 2
-    stride: 2
   }
 }
+#################
 layer {
   name: "prob"
   type: "Softmax"
-  bottom: "score_geo"
+  bottom: "convf"
   top: "prob"
 }
 

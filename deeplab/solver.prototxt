@@ -1,15 +1,17 @@
-train_net: "voc12/config/vgg128_noup/train_train.prototxt"
-
-lr_policy: "poly"
-power: 0.9
-base_lr: 1e-3
-
+train_net: "trainval.prototxt"
+test_net: "test.prototxt"
+test_iter: 20
+test_interval:40
+display:20
 average_loss: 20
-display: 20
-max_iter: 20000
+lr_policy: "poly"
+
+power: 0.9
+base_lr: 1e-6
+
+max_iter: 200000
 momentum: 0.9
 weight_decay: 0.0005
-
-snapshot: 20000
-snapshot_prefix: "voc12/model/vgg128_noup/train"
-solver_mode: GPU
+test_initialization: false
+snapshot: 5000
+snapshot_prefix: "/home/yihuihe/medical-image-segmentation"
