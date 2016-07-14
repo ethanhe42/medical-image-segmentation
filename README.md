@@ -1,4 +1,7 @@
 # segmentation for medical image
+polyp image segmentation.
+under deeplab or siftflow folder, run:
+`python solve.py`
 
 ### related work
 1. Fully Convolutional Models for Semantic Segmentation
